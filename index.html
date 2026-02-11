@@ -29,14 +29,12 @@
     <style>
         /* --- STANDARD & LIGHTWEIGHT CSS --- */
         
-        /* 1. Default System Fonts (Fastest loading) */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #0f0f0f; /* YouTube-like Dark BG */
+            background-color: #0f0f0f;
             color: #e5e5e5;
         }
 
-        /* 2. Player Container (Cinema Style) */
         .player-wrapper {
             background: #000;
             width: 100%;
@@ -48,7 +46,7 @@
         .video-container {
             width: 100%;
             position: relative;
-            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            padding-bottom: 56.25%;
             background: #000;
         }
 
@@ -59,7 +57,6 @@
             height: 100% !important;
         }
 
-        /* 3. Simple Overlays (No Animations) */
         .loading-overlay, .error-overlay {
             position: absolute;
             inset: 0;
@@ -72,27 +69,25 @@
             display: none;
         }
         
-        /* 4. Grid System */
-        .custom-card-width { width: 31%; } /* Mobile: 3 per row (Classic) */
-        @media (min-width: 640px) { .custom-card-width { width: 18%; } } /* Tablet: 5 per row */
-        @media (min-width: 1024px) { .custom-card-width { width: 12.5%; } } /* PC: 8 per row */
+        .custom-card-width { width: 31%; }
+        @media (min-width: 640px) { .custom-card-width { width: 18%; } }
+        @media (min-width: 1024px) { .custom-card-width { width: 12.5%; } }
 
-        /* 5. Minimal Card Design */
         .channel-card {
             display: block;
-            background: #1a1a1a; /* Darker Card */
+            background: #1a1a1a;
             border-radius: 6px;
             overflow: hidden;
             transition: background 0.2s;
             text-decoration: none;
         }
         .channel-card:hover {
-            background: #2a2a2a; /* Light highlight on hover */
+            background: #2a2a2a;
         }
 
         .card-img-box {
             width: 100%;
-            aspect-ratio: 16/9; /* Standard Video Thumbnail Ratio */
+            aspect-ratio: 16/9;
             background: #000;
             display: flex;
             align-items: center;
@@ -115,7 +110,6 @@
             text-overflow: ellipsis;
         }
 
-        /* 6. Utility Elements */
         .btn-telegram {
             background-color: #229ED9;
             color: white;
@@ -135,7 +129,6 @@
         }
         .load-more:hover { background: #333; color: #fff; }
 
-        /* Skeleton for loading */
         .skeleton { background: #222; width: 100%; height: 100%; }
     </style>
 </head>
@@ -207,11 +200,10 @@
         const AD_URL = "https://intermediategillsevent.com/1b/0f/68/1b0f68c09c17308c6b0d92ee85311590.js";
         const WORKER_BASE_URL = "https://fetch.telegramgrouplink.online"; 
         
-        // Ad Logic
         function manageAds() {
             const lastShown = localStorage.getItem('ad_last_shown_time');
             const now = Date.now();
-            if (!lastShown || (now - parseInt(lastShown) > 60000)) { // 1 min
+            if (!lastShown || (now - parseInt(lastShown) > 60000)) {
                 const script = document.createElement('script');
                 script.type = 'text/javascript'; script.src = AD_URL; script.async = true;
                 document.body.appendChild(script);
@@ -222,7 +214,7 @@
 
         let allChannels = [];
         let displayedCount = 0;
-        const CHANNELS_PER_PAGE = 24; // Increased for dense grid
+        const CHANNELS_PER_PAGE = 24;
 
         async function initApp() {
             if (typeof shaka === 'undefined') { setTimeout(initApp, 100); return; }
@@ -242,7 +234,9 @@
                         const logo = logoMatch ? logoMatch[1] : "";
                         const parts = line.split(',');
                         const name = parts[parts.length - 1].trim();
-                        currentChannel.id = name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase(); currentChannel.name = name; currentChannel.logo = logo;
+                        currentChannel.id = name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase(); 
+                        currentChannel.name = name; 
+                        currentChannel.logo = logo;
                     } else if (line.startsWith('#EXTVLCOPT:http-referrer=')) {
                         currentChannel.headers['Referer'] = line.split('http-referrer=')[1].trim();
                     } else if (line.startsWith('#EXTVLCOPT:http-origin=')) {
@@ -270,10 +264,7 @@
             
             if (nextBatch.length > 0) {
                 const batchHTML = nextBatch.map(c => {
-                    // Optimized image URL
                     const imgUrl = c.logo ? `https://images.weserv.nl/?url=${encodeURIComponent(c.logo)}&w=200&h=112&fit=contain&output=webp` : 'https://via.placeholder.com/200x112?text=NO+LOGO';
-                    
-                    // Simple HTML Structure (New Design)
                     return `
                     <a href="?id=${c.id}" class="channel-card custom-card-width group">
                         <div class="card-img-box">
@@ -305,7 +296,6 @@
             const params = new URLSearchParams(window.location.search);
             const channelId = params.get('id'); 
 
-            // Simple Event Listeners
             player.addEventListener('error', (e) => { if(e.detail.code != 7000) showError("Error code: " + e.detail.code); });
             player.addEventListener('buffering', (event) => {
                 if (event.buffering) connectSpinner.style.display = "flex";
@@ -313,10 +303,13 @@
             });
 
             try {
-                let data = null;
                 const cacheBuster = Math.floor(Date.now() / (10 * 60 * 1000));
-                if(window.dataFetchPromise) data = await window.dataFetchPromise;
-                else { const response = await fetch('allinone.json?v=' + cacheBuster); data = await response.json(); }
+                
+                // Fetch data and custom logos simultaneously
+                const [data, customLogos] = await Promise.all([
+                    window.dataFetchPromise || fetch('allinone.json?v=' + cacheBuster).then(r => r.json()),
+                    fetch('images.json?v=' + cacheBuster).then(r => r.json()).catch(() => ({}))
+                ]);
 
                 let manualChannels = (data && data.manual_channels) ? data.manual_channels.map(c => ({
                     id: c.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase(), name: c.name, logo: c.logo, streamUrl: c.url, headers: {}, drm: c.drm 
@@ -332,7 +325,15 @@
                 }
                 
                 let combinedChannels = [...manualChannels, ...m3uChannels];
-                // Allowed Channels Filter
+
+                // Logic to use images.json logos
+                combinedChannels = combinedChannels.map(ch => {
+                    if (customLogos && customLogos[ch.name]) {
+                        ch.logo = customLogos[ch.name];
+                    }
+                    return ch;
+                });
+
                 if (data && data.allowed_channels && Array.isArray(data.allowed_channels)) {
                     allChannels = [];
                     data.allowed_channels.forEach(allowedName => {
@@ -343,11 +344,13 @@
 
                 allChannels = allChannels.filter(c => c.streamUrl && c.streamUrl.trim() !== "");
                 
-                // Render
-                if (allChannels.length > 0) { renderChannelBatch(); document.getElementById('loadMoreBtn').addEventListener('click', renderChannelBatch); } 
-                else { document.getElementById('channelGrid').innerHTML = `<p class="text-gray-500 w-full text-center">No channels.</p>`; }
+                if (allChannels.length > 0) { 
+                    renderChannelBatch(); 
+                    document.getElementById('loadMoreBtn').addEventListener('click', renderChannelBatch); 
+                } else { 
+                    document.getElementById('channelGrid').innerHTML = `<p class="text-gray-500 w-full text-center">No channels.</p>`; 
+                }
 
-                // Play Logic
                 const ch = allChannels.find(c => c.id === channelId);
                 if (ch) {
                     document.getElementById('page-title').innerText = ch.name;
@@ -355,7 +358,6 @@
                     document.getElementById('ch-status').innerText = "Connecting...";
                     connectSpinner.style.display = "flex";
 
-                    // Proxy Setup
                     player.getNetworkingEngine().registerRequestFilter(function(type, request) {
                         if (request.uris[0].includes(WORKER_BASE_URL)) return;
                         let proxyUrl = `${WORKER_BASE_URL}?url=${encodeURIComponent(request.uris[0])}`;
