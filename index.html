@@ -34,6 +34,39 @@
         .player-wrapper { background: #000; width: 100%; position: relative; overflow: hidden; border-bottom: 1px solid #333; }
         .video-container { width: 100%; position: relative; padding-bottom: 56.25%; background: #000; }
         .shaka-video-container { position: absolute; top: 0; left: 0; width: 100% !important; height: 100% !important; }
+        
+        /* Live Badge Style */
+        .live-indicator {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(255, 0, 0, 0.85);
+            color: white;
+            padding: 3px 8px;
+            font-size: 11px;
+            font-weight: 800;
+            border-radius: 4px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            letter-spacing: 0.5px;
+            pointer-events: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            background-color: white;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
         .loading-overlay, .error-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); z-index: 20; display: none; }
         .custom-card-width { width: 31%; }
         @media (min-width: 640px) { .custom-card-width { width: 18%; } }
@@ -51,10 +84,13 @@
 </head>
 <body class="flex flex-col min-h-screen">
 
-    <div class="w-full max-w-6xl mx-auto bg-black shadow-lg">
+    <div class="w-full max-w-6xl mx-auto bg-black shadow-lg mt-4">
         <div class="player-wrapper">
             <div class="video-container" id="video-wrapper">
                 <div data-shaka-player-container>
+                    <div class="live-indicator">
+                        <div class="live-dot"></div> LIVE
+                    </div>
                     <video data-shaka-player id="video" autoplay style="width:100%;height:100%"></video>
                 </div>
                 <div id="connect-spinner" class="loading-overlay">
@@ -207,7 +243,6 @@
                     rawChannels.push(...m3uResults.flat());
                 }
 
-                // 1. FILTERING (Renaming වලට කලින් original name එකෙන් filter කරනවා)
                 let filteredList = [];
                 if (data && data.allowed_channels && Array.isArray(data.allowed_channels)) {
                     data.allowed_channels.forEach(allowed => {
@@ -218,16 +253,12 @@
                     filteredList = rawChannels;
                 }
 
-                // 2. RENAMING & LOGO UPDATE
                 allChannels = filteredList.map(ch => {
                     const originalName = ch.name;
-                    // Custom Name update
                     if (customNames && customNames[originalName]) {
                         ch.name = customNames[originalName];
                     }
-                    // Generate ID from the final name
                     ch.id = ch.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-                    // Custom Logo update (Use original name to find the logo mapping)
                     if (customLogos && customLogos[originalName]) {
                         ch.logo = customLogos[originalName];
                     }
@@ -241,7 +272,6 @@
                     document.getElementById('loadMoreBtn').addEventListener('click', renderChannelBatch);
                 }
 
-                // Play Logic
                 const ch = allChannels.find(c => c.id === channelId);
                 if (ch) {
                     document.getElementById('page-title').innerText = ch.name;
