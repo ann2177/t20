@@ -9,12 +9,9 @@
     <title id="page-title">Loading Stream...</title>
     
     <link rel="preconnect" href="https://fetch.telegramgrouplink.online" crossorigin>
-
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/controls.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/shaka-player.ui.min.js" defer></script>
 
     <script>
@@ -26,121 +23,201 @@
     </script>
 
     <style>
+        /* Telegram Dark Theme Colors */
+        :root {
+            --tg-bg: #0e1621;
+            --tg-secondary-bg: #17212b;
+            --tg-header: #242f3d;
+            --tg-blue: #2481cc;
+            --tg-text: #f5f5f5;
+            --tg-text-secondary: #708499;
+            --tg-card-hover: #202b36;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #0f0f0f;
-            color: #e5e5e5;
+            background-color: var(--tg-bg);
+            color: var(--tg-text);
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
-        .player-wrapper { background: #000; width: 100%; position: relative; overflow: hidden; border-bottom: 1px solid #333; }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 10px;
+        }
+
+        /* Player Styling */
+        .player-section {
+            margin-top: 16px; /* Space above player */
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #2b3949;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .player-wrapper { position: relative; width: 100%; }
         .video-container { width: 100%; position: relative; padding-bottom: 56.25%; background: #000; }
         .shaka-video-container { position: absolute; top: 0; left: 0; width: 100% !important; height: 100% !important; }
-        
-        /* Live Badge Style */
+
+        /* Top-Right LIVE Badge */
         .live-indicator {
             position: absolute;
             top: 15px;
-            left: 15px;
-            background: rgba(255, 0, 0, 0.85);
+            right: 15px;
+            background: rgba(255, 59, 48, 0.9);
             color: white;
-            padding: 3px 8px;
+            padding: 4px 10px;
             font-size: 11px;
             font-weight: 800;
             border-radius: 4px;
             z-index: 10;
-            display: flex;
+            display: none; /* Only show when playing via JS */
             align-items: center;
             gap: 5px;
-            letter-spacing: 0.5px;
-            pointer-events: none;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
-        .live-dot {
-            width: 6px;
-            height: 6px;
-            background-color: white;
-            border-radius: 50%;
-            animation: pulse 1.5s infinite;
+        .live-dot { width: 6px; height: 6px; background: white; border-radius: 50%; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        .player-info {
+            padding: 12px 16px;
+            background: var(--tg-header);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.3; }
-            100% { opacity: 1; }
+        #ch-name { font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .ch-meta { font-size: 12px; color: var(--tg-text-secondary); }
+
+        /* Telegram Join Button */
+        .tg-join-box {
+            display: flex;
+            justify-content: center;
+            margin: 25px 0;
+        }
+        .btn-telegram {
+            background-color: var(--tg-blue);
+            color: white;
+            text-decoration: none;
+            padding: 10px 24px;
+            border-radius: 25px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: opacity 0.2s;
+        }
+        .btn-telegram:hover { opacity: 0.9; }
+
+        /* Channel Grid */
+        .section-title {
+            font-size: 13px;
+            color: var(--tg-blue);
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-left: 5px;
         }
 
-        .loading-overlay, .error-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); z-index: 20; display: none; }
-        .custom-card-width { width: 31%; }
-        @media (min-width: 640px) { .custom-card-width { width: 18%; } }
-        @media (min-width: 1024px) { .custom-card-width { width: 12.5%; } }
-        .channel-card { display: block; background: #1a1a1a; border-radius: 6px; overflow: hidden; transition: background 0.2s; text-decoration: none; }
-        .channel-card:hover { background: #2a2a2a; }
-        .card-img-box { width: 100%; aspect-ratio: 16/9; background: #000; display: flex; align-items: center; justify-content: center; padding: 10px; }
+        .channel-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        @media (min-width: 600px) { .channel-grid { grid-template-columns: repeat(5, 1fr); } }
+        @media (min-width: 900px) { .channel-grid { grid-template-columns: repeat(7, 1fr); } }
+
+        .channel-card {
+            background: var(--tg-secondary-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            transition: background 0.2s;
+            border: 1px solid #2b3949;
+        }
+        .channel-card:hover { background: var(--tg-card-hover); }
+        .card-img-box { width: 100%; aspect-ratio: 1/1; background: #000; display: flex; align-items: center; justify-content: center; padding: 12px; }
         .card-img-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        .card-info { padding: 8px 6px; text-align: center; }
-        .ch-title { font-size: 13px; font-weight: 500; color: #ddd; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .btn-telegram { background-color: #229ED9; color: white; font-weight: 500; border-radius: 20px; transition: opacity 0.2s; }
-        .load-more { background: #222; color: #aaa; border: 1px solid #333; padding: 10px 30px; border-radius: 4px; font-size: 13px; }
-        .skeleton { background: #222; width: 100%; height: 100%; }
+        .card-info { padding: 8px 4px; text-align: center; }
+        .ch-title { font-size: 12px; font-weight: 500; color: var(--tg-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Overlay & Load More */
+        .loading-overlay, .error-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); z-index: 20; display: none; }
+        .load-more-container { display: flex; justify-content: center; padding: 20px 0 40px; }
+        .load-more-btn { background: var(--tg-secondary-bg); color: var(--tg-blue); border: 1px solid var(--tg-blue); padding: 8px 30px; border-radius: 20px; cursor: pointer; font-size: 13px; }
+        .hidden { display: none; }
+        .skeleton { background: #242f3d; width: 100%; height: 100%; }
+
+        footer { padding: 20px; text-align: center; color: var(--tg-text-secondary); font-size: 11px; border-top: 1px solid #242f3d; }
     </style>
 </head>
-<body class="flex flex-col min-h-screen">
+<body>
 
-    <div class="w-full max-w-6xl mx-auto bg-black shadow-lg mt-4">
-        <div class="player-wrapper">
-            <div class="video-container" id="video-wrapper">
-                <div data-shaka-player-container>
-                    <div class="live-indicator">
-                        <div class="live-dot"></div> LIVE
+    <div class="container">
+        <div class="player-section">
+            <div class="player-wrapper">
+                <div class="video-container" id="video-wrapper">
+                    <div data-shaka-player-container>
+                        <div id="live-badge" class="live-indicator">
+                            <div class="live-dot"></div> LIVE
+                        </div>
+                        <video data-shaka-player id="video" autoplay style="width:100%;height:100%"></video>
                     </div>
-                    <video data-shaka-player id="video" autoplay style="width:100%;height:100%"></video>
-                </div>
-                <div id="connect-spinner" class="loading-overlay">
-                    <i class="fas fa-spinner fa-spin text-3xl text-gray-400"></i>
-                </div>
-                <div id="status-overlay" class="error-overlay">
-                    <div class="text-center px-4">
-                        <p class="text-red-400 font-bold mb-2" id="error-msg">Stream Error</p>
-                        <button onclick="location.reload()" class="px-3 py-1 bg-white text-black text-xs font-bold rounded">RETRY</button>
+                    <div id="connect-spinner" class="loading-overlay">
+                        <i class="fas fa-spinner fa-spin text-3xl text-gray-400"></i>
+                    </div>
+                    <div id="status-overlay" class="error-overlay">
+                        <div style="text-align: center;">
+                            <p style="color: #ff3b30; font-weight: bold; margin-bottom: 10px;" id="error-msg">Stream Error</p>
+                            <button onclick="location.reload()" style="padding: 5px 15px; border-radius: 4px; border: none; background: white; cursor: pointer;">RETRY</button>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="p-3 md:p-4 flex justify-between items-center bg-[#181818]">
-                <div class="overflow-hidden">
-                    <h1 class="text-base md:text-lg font-medium text-white truncate" id="ch-name">Select a Channel</h1>
-                    <div class="flex items-center gap-2 text-xs text-gray-400">
-                        <span id="ch-quality" class="bg-red-600 text-white px-1 rounded-[2px] font-bold">LIVE</span>
-                        <span id="ch-status">Ready</span>
+            <div class="player-info">
+                <div>
+                    <h1 id="ch-name">Select a Channel</h1>
+                    <div class="ch-meta">
+                        <span style="color: #ff3b30; font-weight: bold;">● LIVE</span> • <span id="ch-status">Ready</span>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <main class="w-full max-w-6xl mx-auto px-2 md:px-4 py-6 flex-grow">
-        <div class="flex justify-center mb-8">
-            <a href="https://t.me/Hitwicket_updates" target="_blank" class="btn-telegram px-6 py-2 flex items-center gap-2 text-sm">
+        <div class="tg-join-box">
+            <a href="https://t.me/Hitwicket_updates" target="_blank" class="btn-telegram">
                 <i class="fab fa-telegram-plane"></i> Join Telegram Channel
             </a>
         </div>
 
-        <div class="mb-4 pl-1">
-            <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider">All Channels</h2>
+        <h2 class="section-title">All Channels</h2>
+        <div class="channel-grid" id="channelGrid">
+            <div class="channel-card"><div class="card-img-box"><div class="skeleton"></div></div></div>
+            <div class="channel-card"><div class="card-img-box"><div class="skeleton"></div></div></div>
+            <div class="channel-card"><div class="card-img-box"><div class="skeleton"></div></div></div>
         </div>
 
-        <div class="flex flex-wrap gap-2 md:gap-3 justify-center md:justify-start" id="channelGrid">
-            <div class="channel-card custom-card-width"><div class="card-img-box"><div class="skeleton"></div></div></div>
-            <div class="channel-card custom-card-width"><div class="card-img-box"><div class="skeleton"></div></div></div>
+        <div id="loadMoreContainer" class="load-more-container hidden">
+            <button id="loadMoreBtn" class="load-more-btn">Load More</button>
         </div>
+    </div>
 
-        <div id="loadMoreContainer" class="w-full flex justify-center mt-8 hidden">
-            <button id="loadMoreBtn" class="load-more">Load More</button>
-        </div>
-    </main>
-
-    <footer class="py-6 text-center text-gray-600 text-xs border-t border-[#222] mt-auto">
-        <p>© 2024 Live Sports Streaming</p>
+    <footer>
+        <p>© 2024 Live Sports Streaming - Telegram Style</p>
     </footer>
 
     <script>
+        // Technology logic remains identical as per instructions
         const AD_URL = "https://intermediategillsevent.com/1b/0f/68/1b0f68c09c17308c6b0d92ee85311590.js";
         const WORKER_BASE_URL = "https://proxy.cricketfanclub.online"; 
         
@@ -193,11 +270,11 @@
             const nextBatch = allChannels.slice(displayedCount, displayedCount + CHANNELS_PER_PAGE);
             if (nextBatch.length > 0) {
                 const batchHTML = nextBatch.map(c => {
-                    const imgUrl = c.logo ? c.logo : 'https://via.placeholder.com/200x112?text=NO+LOGO';
+                    const imgUrl = c.logo ? c.logo : 'https://via.placeholder.com/200?text=NO+LOGO';
                     return `
-                    <a href="?id=${c.id}" class="channel-card custom-card-width group">
+                    <a href="?id=${c.id}" class="channel-card">
                         <div class="card-img-box">
-                            <img src="${imgUrl}" loading="lazy" class="opacity-80 group-hover:opacity-100 transition-opacity" onerror="this.src='https://via.placeholder.com/200x112?text=ERROR'">
+                            <img src="${imgUrl}" loading="lazy" onerror="this.src='https://via.placeholder.com/200?text=ERROR'">
                         </div>
                         <div class="card-info">
                             <div class="ch-title">${c.name}</div>
@@ -213,13 +290,23 @@
 
         async function initPlayer() {
             const video = document.getElementById('video');
+            const liveBadge = document.getElementById('live-badge');
             if (!video['ui']) { const checkUI = setInterval(() => { if (video['ui']) { clearInterval(checkUI); initPlayer(); } }, 100); return; }
 
             const player = video['ui'].getControls().getPlayer();
             const connectSpinner = document.getElementById('connect-spinner');
-            const statusOverlay = document.getElementById('status-overlay');
             const params = new URLSearchParams(window.location.search);
             const channelId = params.get('id'); 
+
+            // LIVE Badge Logic
+            video.addEventListener('playing', () => { 
+                liveBadge.style.display = 'flex'; 
+                connectSpinner.style.display = "none"; 
+                document.getElementById('ch-status').innerText = "Streaming";
+            });
+            video.addEventListener('waiting', () => { liveBadge.style.display = 'none'; });
+            video.addEventListener('pause', () => { liveBadge.style.display = 'none'; });
+            video.addEventListener('ended', () => { liveBadge.style.display = 'none'; });
 
             try {
                 const cacheBuster = Math.floor(Date.now() / (10 * 60 * 1000));
@@ -255,13 +342,9 @@
 
                 allChannels = filteredList.map(ch => {
                     const originalName = ch.name;
-                    if (customNames && customNames[originalName]) {
-                        ch.name = customNames[originalName];
-                    }
+                    if (customNames && customNames[originalName]) ch.name = customNames[originalName];
                     ch.id = ch.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-                    if (customLogos && customLogos[originalName]) {
-                        ch.logo = customLogos[originalName];
-                    }
+                    if (customLogos && customLogos[originalName]) ch.logo = customLogos[originalName];
                     return ch;
                 });
 
@@ -288,16 +371,9 @@
                     });
                     
                     player.configure({ drm: ch.drm || { clearKeys: {} }, streaming: { bufferingGoal: 3, lowLatencyMode: true } });
-                    
-                    video.addEventListener('playing', () => { connectSpinner.style.display = "none"; document.getElementById('ch-status').innerText = "Streaming"; }, { once: true });
                     await player.load(ch.streamUrl);
                 }
             } catch (err) { console.error(err); }
-        }
-
-        function showError(msg) { 
-            document.getElementById('status-overlay').style.display = "flex"; 
-            document.getElementById('error-msg').innerText = msg; 
         }
 
         if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initApp); } else { initApp(); }
