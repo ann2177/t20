@@ -26,114 +26,26 @@
     </script>
 
     <style>
-        /* --- STANDARD & LIGHTWEIGHT CSS --- */
-        
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #0f0f0f;
             color: #e5e5e5;
         }
-
-        .player-wrapper {
-            background: #000;
-            width: 100%;
-            position: relative;
-            overflow: hidden;
-            border-bottom: 1px solid #333;
-        }
-        
-        .video-container {
-            width: 100%;
-            position: relative;
-            padding-bottom: 56.25%;
-            background: #000;
-        }
-
-        .shaka-video-container {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100% !important;
-            height: 100% !important;
-        }
-
-        .loading-overlay, .error-overlay {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0,0,0,0.8);
-            z-index: 20;
-            display: none;
-        }
-        
+        .player-wrapper { background: #000; width: 100%; position: relative; overflow: hidden; border-bottom: 1px solid #333; }
+        .video-container { width: 100%; position: relative; padding-bottom: 56.25%; background: #000; }
+        .shaka-video-container { position: absolute; top: 0; left: 0; width: 100% !important; height: 100% !important; }
+        .loading-overlay, .error-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); z-index: 20; display: none; }
         .custom-card-width { width: 31%; }
         @media (min-width: 640px) { .custom-card-width { width: 18%; } }
         @media (min-width: 1024px) { .custom-card-width { width: 12.5%; } }
-
-        .channel-card {
-            display: block;
-            background: #1a1a1a;
-            border-radius: 6px;
-            overflow: hidden;
-            transition: background 0.2s;
-            text-decoration: none;
-        }
-        .channel-card:hover {
-            background: #2a2a2a;
-        }
-
-        .card-img-box {
-            width: 100%;
-            aspect-ratio: 16/9;
-            background: #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 10px;
-        }
-
-        .card-img-box img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-
-        .card-info {
-            padding: 8px 6px;
-            text-align: center;
-        }
-
-        .ch-title {
-            font-size: 13px;
-            font-weight: 500;
-            color: #ddd;
-            line-height: 1.2;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .btn-telegram {
-            background-color: #229ED9;
-            color: white;
-            font-weight: 500;
-            border-radius: 20px;
-            transition: opacity 0.2s;
-        }
-        .btn-telegram:hover { opacity: 0.9; }
-
-        .load-more {
-            background: #222;
-            color: #aaa;
-            border: 1px solid #333;
-            padding: 10px 30px;
-            border-radius: 4px;
-            font-size: 13px;
-        }
-        .load-more:hover { background: #333; color: #fff; }
-
+        .channel-card { display: block; background: #1a1a1a; border-radius: 6px; overflow: hidden; transition: background 0.2s; text-decoration: none; }
+        .channel-card:hover { background: #2a2a2a; }
+        .card-img-box { width: 100%; aspect-ratio: 16/9; background: #000; display: flex; align-items: center; justify-content: center; padding: 10px; }
+        .card-img-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .card-info { padding: 8px 6px; text-align: center; }
+        .ch-title { font-size: 13px; font-weight: 500; color: #ddd; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .btn-telegram { background-color: #229ED9; color: white; font-weight: 500; border-radius: 20px; transition: opacity 0.2s; }
+        .load-more { background: #222; color: #aaa; border: 1px solid #333; padding: 10px 30px; border-radius: 4px; font-size: 13px; }
         .skeleton { background: #222; width: 100%; height: 100%; }
     </style>
 </head>
@@ -142,24 +54,19 @@
     <div class="w-full max-w-6xl mx-auto bg-black shadow-lg">
         <div class="player-wrapper">
             <div class="video-container" id="video-wrapper">
-                
                 <div data-shaka-player-container>
                     <video data-shaka-player id="video" autoplay style="width:100%;height:100%"></video>
                 </div>
-
                 <div id="connect-spinner" class="loading-overlay">
                     <i class="fas fa-spinner fa-spin text-3xl text-gray-400"></i>
                 </div>
-
                 <div id="status-overlay" class="error-overlay">
                     <div class="text-center px-4">
                         <p class="text-red-400 font-bold mb-2" id="error-msg">Stream Error</p>
                         <button onclick="location.reload()" class="px-3 py-1 bg-white text-black text-xs font-bold rounded">RETRY</button>
                     </div>
                 </div>
-
             </div>
-            
             <div class="p-3 md:p-4 flex justify-between items-center bg-[#181818]">
                 <div class="overflow-hidden">
                     <h1 class="text-base md:text-lg font-medium text-white truncate" id="ch-name">Select a Channel</h1>
@@ -173,7 +80,6 @@
     </div>
 
     <main class="w-full max-w-6xl mx-auto px-2 md:px-4 py-6 flex-grow">
-        
         <div class="flex justify-center mb-8">
             <a href="https://t.me/Hitwicket_updates" target="_blank" class="btn-telegram px-6 py-2 flex items-center gap-2 text-sm">
                 <i class="fab fa-telegram-plane"></i> Join Telegram Channel
@@ -187,36 +93,21 @@
         <div class="flex flex-wrap gap-2 md:gap-3 justify-center md:justify-start" id="channelGrid">
             <div class="channel-card custom-card-width"><div class="card-img-box"><div class="skeleton"></div></div></div>
             <div class="channel-card custom-card-width"><div class="card-img-box"><div class="skeleton"></div></div></div>
-            <div class="channel-card custom-card-width"><div class="card-img-box"><div class="skeleton"></div></div></div>
-            <div class="channel-card custom-card-width"><div class="card-img-box"><div class="skeleton"></div></div></div>
         </div>
 
         <div id="loadMoreContainer" class="w-full flex justify-center mt-8 hidden">
             <button id="loadMoreBtn" class="load-more">Load More</button>
         </div>
-
     </main>
 
     <footer class="py-6 text-center text-gray-600 text-xs border-t border-[#222] mt-auto">
-        <p></p>
+        <p>© 2024 Live Sports Streaming</p>
     </footer>
 
     <script>
         const AD_URL = "https://intermediategillsevent.com/1b/0f/68/1b0f68c09c17308c6b0d92ee85311590.js";
         const WORKER_BASE_URL = "https://fetch.telegramgrouplink.online"; 
         
-        function manageAds() {
-            const lastShown = localStorage.getItem('ad_last_shown_time');
-            const now = Date.now();
-            if (!lastShown || (now - parseInt(lastShown) > 60000)) {
-                const script = document.createElement('script');
-                script.type = 'text/javascript'; script.src = AD_URL; script.async = true;
-                document.body.appendChild(script);
-                localStorage.setItem('ad_last_shown_time', now.toString());
-            }
-        }
-        setTimeout(manageAds, 3000);
-
         let allChannels = [];
         let displayedCount = 0;
         const CHANNELS_PER_PAGE = 24;
@@ -236,12 +127,10 @@
                     line = line.trim();
                     if (line.startsWith('#EXTINF:')) {
                         const logoMatch = line.match(/tvg-logo="([^"]*)"/);
-                        const logo = logoMatch ? logoMatch[1] : "";
                         const parts = line.split(',');
                         const name = parts[parts.length - 1].trim();
-                        currentChannel.id = name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase(); 
                         currentChannel.name = name; 
-                        currentChannel.logo = logo;
+                        currentChannel.logo = logoMatch ? logoMatch[1] : "";
                     } else if (line.startsWith('#EXTVLCOPT:http-referrer=')) {
                         currentChannel.headers['Referer'] = line.split('http-referrer=')[1].trim();
                     } else if (line.startsWith('#EXTVLCOPT:http-origin=')) {
@@ -266,10 +155,8 @@
             if (displayedCount === 0) gridContainer.innerHTML = ''; 
             
             const nextBatch = allChannels.slice(displayedCount, displayedCount + CHANNELS_PER_PAGE);
-            
             if (nextBatch.length > 0) {
                 const batchHTML = nextBatch.map(c => {
-                    // Direct image loading without Weserv proxy
                     const imgUrl = c.logo ? c.logo : 'https://via.placeholder.com/200x112?text=NO+LOGO';
                     return `
                     <a href="?id=${c.id}" class="channel-card custom-card-width group">
@@ -279,13 +166,10 @@
                         <div class="card-info">
                             <div class="ch-title">${c.name}</div>
                         </div>
-                    </a>
-                    `;
+                    </a>`;
                 }).join('');
-                
                 gridContainer.insertAdjacentHTML('beforeend', batchHTML);
                 displayedCount += nextBatch.length;
-                
                 if (displayedCount < allChannels.length) loadMoreContainer.classList.remove('hidden');
                 else loadMoreContainer.classList.add('hidden');
             }
@@ -295,75 +179,76 @@
             const video = document.getElementById('video');
             if (!video['ui']) { const checkUI = setInterval(() => { if (video['ui']) { clearInterval(checkUI); initPlayer(); } }, 100); return; }
 
-            const ui = video['ui'];
-            const player = ui.getControls().getPlayer();
+            const player = video['ui'].getControls().getPlayer();
             const connectSpinner = document.getElementById('connect-spinner');
             const statusOverlay = document.getElementById('status-overlay');
             const params = new URLSearchParams(window.location.search);
             const channelId = params.get('id'); 
 
-            player.addEventListener('error', (e) => { if(e.detail.code != 7000) showError("Error code: " + e.detail.code); });
-            player.addEventListener('buffering', (event) => {
-                if (event.buffering) connectSpinner.style.display = "flex";
-                else connectSpinner.style.display = "none";
-            });
-
             try {
                 const cacheBuster = Math.floor(Date.now() / (10 * 60 * 1000));
-                
-                const [data, customLogos] = await Promise.all([
+                const [data, customLogos, customNames] = await Promise.all([
                     window.dataFetchPromise || fetch('allinone.json?v=' + cacheBuster).then(r => r.json()),
-                    fetch('images.json?v=' + cacheBuster).then(r => r.json()).catch(() => ({}))
+                    fetch('images.json?v=' + cacheBuster).then(r => r.json()).catch(() => ({})),
+                    fetch('names.json?v=' + cacheBuster).then(r => r.json()).catch(() => ({}))
                 ]);
 
-                let manualChannels = (data && data.manual_channels) ? data.manual_channels.map(c => ({
-                    id: c.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase(), name: c.name, logo: c.logo, streamUrl: c.url, headers: {}, drm: c.drm 
-                })) : [];
-
-                let m3uChannels = [];
-                if (data && data.playlists) {
-                    const promises = data.playlists.map(async (url) => {
-                        try { return await parseM3U(await (await fetch(url + (url.includes('?') ? '&' : '?') + 'update=' + cacheBuster)).text()); } 
-                        catch (e) { return []; }
-                    });
-                    m3uChannels = (await Promise.all(promises)).flat();
+                let rawChannels = [];
+                if (data && data.manual_channels) {
+                    rawChannels.push(...data.manual_channels.map(c => ({
+                        name: c.name, logo: c.logo, streamUrl: c.url, headers: {}, drm: c.drm 
+                    })));
                 }
-                
-                let combinedChannels = [...manualChannels, ...m3uChannels];
+                if (data && data.playlists) {
+                    const m3uResults = await Promise.all(data.playlists.map(async (url) => {
+                        try { return await parseM3U(await (await fetch(url + (url.includes('?') ? '&' : '?') + 'v=' + cacheBuster)).text()); } 
+                        catch (e) { return []; }
+                    }));
+                    rawChannels.push(...m3uResults.flat());
+                }
 
-                // Prioritize images.json logos
-                combinedChannels = combinedChannels.map(ch => {
-                    if (customLogos && customLogos[ch.name]) {
-                        ch.logo = customLogos[ch.name];
+                // 1. FILTERING (Renaming වලට කලින් original name එකෙන් filter කරනවා)
+                let filteredList = [];
+                if (data && data.allowed_channels && Array.isArray(data.allowed_channels)) {
+                    data.allowed_channels.forEach(allowed => {
+                        const match = rawChannels.find(ch => ch.name.toLowerCase().trim() === allowed.toLowerCase().trim());
+                        if (match) filteredList.push(match);
+                    });
+                } else {
+                    filteredList = rawChannels;
+                }
+
+                // 2. RENAMING & LOGO UPDATE
+                allChannels = filteredList.map(ch => {
+                    const originalName = ch.name;
+                    // Custom Name update
+                    if (customNames && customNames[originalName]) {
+                        ch.name = customNames[originalName];
+                    }
+                    // Generate ID from the final name
+                    ch.id = ch.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+                    // Custom Logo update (Use original name to find the logo mapping)
+                    if (customLogos && customLogos[originalName]) {
+                        ch.logo = customLogos[originalName];
                     }
                     return ch;
                 });
 
-                if (data && data.allowed_channels && Array.isArray(data.allowed_channels)) {
-                    allChannels = [];
-                    data.allowed_channels.forEach(allowedName => {
-                        const match = combinedChannels.find(ch => ch.name.toLowerCase().trim() === allowedName.toLowerCase().trim());
-                        if (match) allChannels.push(match);
-                    });
-                } else { allChannels = combinedChannels; }
+                allChannels = allChannels.filter(c => c.streamUrl);
 
-                allChannels = allChannels.filter(c => c.streamUrl && c.streamUrl.trim() !== "");
-                
-                if (allChannels.length > 0) { 
-                    renderChannelBatch(); 
-                    document.getElementById('loadMoreBtn').addEventListener('click', renderChannelBatch); 
-                } else { 
-                    document.getElementById('channelGrid').innerHTML = `<p class="text-gray-500 w-full text-center">No channels.</p>`; 
+                if (allChannels.length > 0) {
+                    renderChannelBatch();
+                    document.getElementById('loadMoreBtn').addEventListener('click', renderChannelBatch);
                 }
 
+                // Play Logic
                 const ch = allChannels.find(c => c.id === channelId);
                 if (ch) {
                     document.getElementById('page-title').innerText = ch.name;
                     document.getElementById('ch-name').innerText = ch.name;
-                    document.getElementById('ch-status').innerText = "Connecting...";
                     connectSpinner.style.display = "flex";
 
-                    player.getNetworkingEngine().registerRequestFilter(function(type, request) {
+                    player.getNetworkingEngine().registerRequestFilter((type, request) => {
                         if (request.uris[0].includes(WORKER_BASE_URL)) return;
                         let proxyUrl = `${WORKER_BASE_URL}?url=${encodeURIComponent(request.uris[0])}`;
                         if (ch.headers.Referer) proxyUrl += `&referer=${encodeURIComponent(ch.headers.Referer)}`;
@@ -372,24 +257,17 @@
                         request.uris[0] = proxyUrl;
                     });
                     
-                    player.configure({ drm: ch.drm || { clearKeys: {} }, streaming: { bufferingGoal: 3, rebufferingGoal: 1, retryParameters: { maxAttempts: 3, baseDelay: 1000 }, lowLatencyMode: true } });
+                    player.configure({ drm: ch.drm || { clearKeys: {} }, streaming: { bufferingGoal: 3, lowLatencyMode: true } });
                     
-                    const onPlaying = () => { connectSpinner.style.display = "none"; document.getElementById('ch-status').innerText = "Streaming"; };
-                    video.addEventListener('canplay', onPlaying, { once: true }); 
-                    video.addEventListener('playing', onPlaying, { once: true });
-                    
+                    video.addEventListener('playing', () => { connectSpinner.style.display = "none"; document.getElementById('ch-status').innerText = "Streaming"; }, { once: true });
                     await player.load(ch.streamUrl);
-                    
-                } else {
-                    connectSpinner.style.display = "none";
-                    if(channelId) showError("Channel unavailable");
                 }
-            } catch (err) { connectSpinner.style.display = "none"; if(channelId) showError("Load failed"); }
+            } catch (err) { console.error(err); }
+        }
 
-            function showError(msg) { 
-                statusOverlay.style.display = "flex"; 
-                document.getElementById('error-msg').innerText = msg; 
-            }
+        function showError(msg) { 
+            document.getElementById('status-overlay').style.display = "flex"; 
+            document.getElementById('error-msg').innerText = msg; 
         }
 
         if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initApp); } else { initApp(); }
