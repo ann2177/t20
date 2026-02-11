@@ -85,7 +85,6 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         
-        /* Steady White Dot (No Animation) */
         .live-dot { 
             width: 4px; 
             height: 4px; 
@@ -109,10 +108,20 @@
         #ch-name { font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .ch-meta { font-size: 12px; color: var(--tg-text-secondary); }
 
+        /* New Promo Text Styling */
+        .promo-text {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 13px;
+            color: var(--tg-text-secondary);
+            padding: 0 15px;
+        }
+        .promo-text b { color: var(--tg-blue); font-weight: 600; }
+
         .tg-join-box {
             display: flex;
             justify-content: center;
-            margin: 20px 0;
+            margin: 12px 0 25px 0; /* Adjusted margin */
         }
         .btn-telegram {
             background-color: var(--tg-blue);
@@ -204,9 +213,13 @@
             </div>
         </div>
 
+        <p class="promo-text">
+            Join our Telegram channel to watch in <b>Full Screen</b> and get live updates.
+        </p>
+
         <div class="tg-join-box">
             <a href="https://t.me/Hitwicket_updates" target="_blank" class="btn-telegram">
-                <i class="fab fa-telegram-plane"></i> Join Telegram Channel
+                <i class="fab fa-telegram-plane"></i>Telegram Channel
             </a>
         </div>
 
@@ -223,7 +236,7 @@
     </div>
 
     <footer>
-        <p>© 2024 Live Sports Streaming</p>
+        <p>© 2025 Live Sports Streaming</p>
     </footer>
 
     <script>
