@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Live Stream</title>
+    
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://images.weserv.nl">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/controls.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/shaka-player.ui.min.js" defer></script>
+
+    <style>
+        :root { --bg: #0e1621; --panel: #17212b; --blue: #24a1de; --text: #ffffff; --sub: #8191a1; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        
+        main { width: 100%; max-width: 900px; padding: 15px; }
+
+        /* Modern Sleek Player */
+        .player-container { border-radius: 12px; overflow: hidden; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); }
+        .video-box { position: relative; padding-bottom: 56.25%; height: 0; }
+        .video-box video { position: absolute; top:0; left:0; width:100%; height:100%; }
+
+        .info-bar { background: var(--panel); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.05); }
+        .ch-meta { display: flex; align-items: center; gap: 12px; }
+        .ch-avatar { width: 40px; height: 40px; background: #2b5278; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; }
+        .ch-details h2 { margin: 0; font-size: 15px; font-weight: 600; }
+        .ch-details p { margin: 2px 0 0; font-size: 11px; color: var(--blue); }
+
+        .join-btn { background: var(--blue); color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 6px; }
+
+        /* Fast Grid */
+        .section-title { font-size: 12px; text-transform: uppercase; color: var(--sub); letter-spacing: 1px; margin: 25px 0 15px 5px; font-weight: bold; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        @media (min-width: 768px) { .grid { grid-template-columns: repeat(8, 1fr); } }
+
+        .card { background: var(--panel); border-radius: 10px; padding: 6px; text-decoration: none; transition: transform 0.1s; border: 1px solid transparent; }
+        .card:active { transform: scale(0.95); }
+        .card img { width: 100%; aspect-ratio: 1; border-radius: 6px; object-fit: contain; background: #000; margin-bottom: 5px; }
+        .card div { font-size: 10px; color: #fff; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        #loader { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; background: #000; z-index: 5; }
+        .spinner { width: 30px; height: 30px; border: 3px solid rgba(36,161,222,0.2); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .hidden { display: none !important; }
+        .load-more { width: 100%; padding: 12px; background: transparent; border: none; color: var(--blue); font-weight: bold; cursor: pointer; margin-top: 20px; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+    <main>
+        <div class="player-container">
+            <div class="video-box" id="vid-wrap">
+                <div data-shaka-player-container style="width:100%;height:100%">
+                    <video data-shaka-player id="video" autoplay></video>
+                </div>
+                <div id="loader"><div class="spinner"></div></div>
+            </div>
+            
+            <div class="info-bar">
+                <div class="ch-meta">
+                    <div class="ch-avatar" id="avatar">S</div>
+                    <div class="ch-details">
+                        <h2 id="name">Select Channel</h2>
+                        <p id="status">Online</p>
+                    </div>
+                </div>
+                <a href="https://t.me/Hitwicket_updates" target="_blank" class="join-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    JOIN
+                </a>
+            </div>
+        </div>
+
+        <div class="section-title">Live Channels</div>
+        <div class="grid" id="grid"></div>
+        <button id="loadBtn" class="load-more hidden">LOAD MORE</button>
+    </main>
+
+    <script>
+        const WORKER = "https://autoupdate.hitwicket.online";
+        let list = [], count = 0, step = 24;
+
+        const getCache = () => Math.floor(Date.now() / 600000);
+
+        async function init() {
+            try {
+                const res = await fetch(`links.json?v=${getCache()}`);
+                const data = await res.json();
+                list = data.manual_channels.map(c => ({
+                    id: c.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase(),
+                    name: c.name, img: c.logo, url: c.url, drm: c.drm
+                }));
+                render();
+                if (shaka.Player.isBrowserSupported()) startPlayer();
+            } catch (e) { console.error(e); }
+        }
+
+        function render() {
+            const container = document.getElementById('grid');
+            const chunk = list.slice(count, count + step);
+            chunk.forEach(c => {
+                const a = document.createElement('a');
+                a.className = 'card';
+                a.href = `?id=${c.id}`;
+                a.innerHTML = `<img src="https://images.weserv.nl/?url=${encodeURIComponent(c.img)}&w=80&h=80&fit=contain&output=webp" alt="CH"><div>${c.name}</div>`;
+                container.appendChild(a);
+            });
+            count += step;
+            document.getElementById('loadBtn').classList.toggle('hidden', count >= list.length);
+        }
+
+        async function startPlayer() {
+            const video = document.getElementById('video');
+            const ui = video['ui'];
+            if (!ui) return setTimeout(startPlayer, 50);
+
+            const player = ui.getControls().getPlayer();
+            const id = new URLSearchParams(window.location.search).get('id');
+            const ch = list.find(c => c.id === id);
+
+            player.addEventListener('buffering', e => {
+                document.getElementById('loader').classList.toggle('hidden', !e.buffering);
+            });
+
+            if (ch) {
+                document.title = ch.name;
+                document.getElementById('name').innerText = ch.name;
+                document.getElementById('avatar').innerText = ch.name[0];
+                document.getElementById('status').innerText = "Streaming Now";
+                
+                player.getNetworkingEngine().registerRequestFilter((type, req) => {
+                    if (!req.uris[0].includes(WORKER)) req.uris[0] = `${WORKER}?url=${encodeURIComponent(req.uris[0])}`;
+                });
+
+                player.configure({ drm: ch.drm || { clearKeys: {} } });
+                await player.load(ch.streamUrl || ch.url);
+                document.getElementById('loader').classList.add('hidden');
+            } else {
+                document.getElementById('loader').classList.add('hidden');
+            }
+        }
+
+        document.getElementById('loadBtn').onclick = render;
+        init();
+    </script>
+</body>
+</html>
