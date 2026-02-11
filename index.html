@@ -20,7 +20,7 @@
 
     <script>
         const getCacheBuster = () => Math.floor(Date.now() / (10 * 60 * 1000));
-        window.dataFetchPromise = fetch('links.json?v=' + getCacheBuster())
+        window.dataFetchPromise = fetch('list.json?v=' + getCacheBuster())
             .then(response => response.json())
             .catch(err => { console.error("Fetch failed", err); return null; });
         setTimeout(() => { location.reload(); }, 120 * 60 * 1000);
