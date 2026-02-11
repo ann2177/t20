@@ -8,8 +8,7 @@
     
     <title id="page-title">Loading Stream...</title>
     
-    <link rel="preconnect" href="https://images.weserv.nl" crossorigin> 
-    <link rel="preconnect" href="https://fetch.telgramgrouplink.online" crossorigin>
+    <link rel="preconnect" href="https://fetch.telegramgrouplink.online" crossorigin>
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     
@@ -93,6 +92,12 @@
             align-items: center;
             justify-content: center;
             padding: 10px;
+        }
+
+        .card-img-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
 
         .card-info {
@@ -264,11 +269,12 @@
             
             if (nextBatch.length > 0) {
                 const batchHTML = nextBatch.map(c => {
-                    const imgUrl = c.logo ? `https://images.weserv.nl/?url=${encodeURIComponent(c.logo)}&w=200&h=112&fit=contain&output=webp` : 'https://via.placeholder.com/200x112?text=NO+LOGO';
+                    // Direct image loading without Weserv proxy
+                    const imgUrl = c.logo ? c.logo : 'https://via.placeholder.com/200x112?text=NO+LOGO';
                     return `
                     <a href="?id=${c.id}" class="channel-card custom-card-width group">
                         <div class="card-img-box">
-                            <img src="${imgUrl}" loading="lazy" class="max-w-full max-h-full object-contain opacity-80 group-hover:opacity-100 transition-opacity">
+                            <img src="${imgUrl}" loading="lazy" class="opacity-80 group-hover:opacity-100 transition-opacity" onerror="this.src='https://via.placeholder.com/200x112?text=ERROR'">
                         </div>
                         <div class="card-info">
                             <div class="ch-title">${c.name}</div>
@@ -305,7 +311,6 @@
             try {
                 const cacheBuster = Math.floor(Date.now() / (10 * 60 * 1000));
                 
-                // Fetch data and custom logos simultaneously
                 const [data, customLogos] = await Promise.all([
                     window.dataFetchPromise || fetch('allinone.json?v=' + cacheBuster).then(r => r.json()),
                     fetch('images.json?v=' + cacheBuster).then(r => r.json()).catch(() => ({}))
@@ -326,7 +331,7 @@
                 
                 let combinedChannels = [...manualChannels, ...m3uChannels];
 
-                // Logic to use images.json logos
+                // Prioritize images.json logos
                 combinedChannels = combinedChannels.map(ch => {
                     if (customLogos && customLogos[ch.name]) {
                         ch.logo = customLogos[ch.name];
