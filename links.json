@@ -4,30 +4,14 @@
     "https://raw.githubusercontent.com/abusaeeidx/IPTV-Scraper-Zilla/refs/heads/main/CricHD.m3u"
   ],
  "allowed_channels": [
-   
-  
-   "Star Sports 1",
+    
    "PTV Sports",
-    "T Sports T20 World Cup 26 (1)",
+   "Star Sports",
     "Willow HD",
-   "T Sports T20 World Cup 26 (2)",
     "Willow HD 2",
-   "T Sports (720p) (4)",
    "Sky Sports Cricket",
-   "ESPN 1",
-   "ESPN 12",
-   "Sony Sports3",
-   "Fox Cricket 501 HD",
-   "Sky Sports Main Event",
-   "A Sports HD",
-   "T Sports HD (3)",
-   "Ten Sports",
-   "T Sports (8)",
-   "T Sports (720p) (3)",
-   "T Sports HD (5)",
-    "T SPORTS HD (10)",
-    "Astro Cricket",
-   "TNT 1",
-   "TNT 2"
+   "ESPN",
+    "Astro Cricket"
+   
   ]
 }
