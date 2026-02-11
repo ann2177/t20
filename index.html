@@ -23,7 +23,6 @@
     </script>
 
     <style>
-        /* Telegram Dark Theme Colors */
         :root {
             --tg-bg: #0e1621;
             --tg-secondary-bg: #17212b;
@@ -48,43 +47,52 @@
 
         .container {
             width: 100%;
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto;
             padding: 0 10px;
         }
 
-        /* Player Styling */
+        /* Player Section */
         .player-section {
-            margin-top: 16px; /* Space above player */
+            margin-top: 16px;
             background: #000;
             border-radius: 8px;
             overflow: hidden;
             border: 1px solid #2b3949;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
         .player-wrapper { position: relative; width: 100%; }
         .video-container { width: 100%; position: relative; padding-bottom: 56.25%; background: #000; }
         .shaka-video-container { position: absolute; top: 0; left: 0; width: 100% !important; height: 100% !important; }
 
-        /* Top-Right LIVE Badge */
+        /* XS LIVE Badge for Mobile */
         .live-indicator {
             position: absolute;
-            top: 15px;
-            right: 15px;
+            top: 10px;
+            right: 10px;
             background: rgba(255, 59, 48, 0.9);
             color: white;
-            padding: 4px 10px;
-            font-size: 11px;
+            padding: 2px 6px;
+            font-size: 9px; /* Extra Small */
             font-weight: 800;
-            border-radius: 4px;
+            border-radius: 3px;
             z-index: 10;
-            display: none; /* Only show when playing via JS */
+            display: none; 
             align-items: center;
-            gap: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            gap: 4px;
+            letter-spacing: 0.3px;
+            pointer-events: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
-        .live-dot { width: 6px; height: 6px; background: white; border-radius: 50%; animation: pulse 1.5s infinite; }
+        
+        /* Pulse dot for XS badge */
+        .live-dot { width: 4px; height: 4px; background: white; border-radius: 50%; animation: pulse 1.5s infinite; }
+        
+        @media (min-width: 768px) {
+            .live-indicator { top: 15px; right: 15px; padding: 3px 8px; font-size: 11px; }
+            .live-dot { width: 6px; height: 6px; }
+        }
+
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
         .player-info {
@@ -97,11 +105,10 @@
         #ch-name { font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .ch-meta { font-size: 12px; color: var(--tg-text-secondary); }
 
-        /* Telegram Join Button */
         .tg-join-box {
             display: flex;
             justify-content: center;
-            margin: 25px 0;
+            margin: 20px 0;
         }
         .btn-telegram {
             background-color: var(--tg-blue);
@@ -113,17 +120,15 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            transition: opacity 0.2s;
+            font-size: 14px;
         }
-        .btn-telegram:hover { opacity: 0.9; }
 
-        /* Channel Grid */
         .section-title {
             font-size: 13px;
             color: var(--tg-blue);
             text-transform: uppercase;
             font-weight: 600;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             padding-left: 5px;
         }
 
@@ -133,32 +138,39 @@
             gap: 10px;
             margin-bottom: 30px;
         }
-        @media (min-width: 600px) { .channel-grid { grid-template-columns: repeat(5, 1fr); } }
-        @media (min-width: 900px) { .channel-grid { grid-template-columns: repeat(7, 1fr); } }
+        @media (min-width: 640px) { .channel-grid { grid-template-columns: repeat(4, 1fr); } }
+        @media (min-width: 900px) { .channel-grid { grid-template-columns: repeat(6, 1fr); } }
 
         .channel-card {
             background: var(--tg-secondary-bg);
-            border-radius: 10px;
+            border-radius: 8px;
             overflow: hidden;
             text-decoration: none;
             color: inherit;
-            transition: background 0.2s;
             border: 1px solid #2b3949;
         }
-        .channel-card:hover { background: var(--tg-card-hover); }
-        .card-img-box { width: 100%; aspect-ratio: 1/1; background: #000; display: flex; align-items: center; justify-content: center; padding: 12px; }
+        
+        .card-img-box { 
+            width: 100%; 
+            aspect-ratio: 16 / 9; 
+            background: #000; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 8px; 
+        }
         .card-img-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        .card-info { padding: 8px 4px; text-align: center; }
-        .ch-title { font-size: 12px; font-weight: 500; color: var(--tg-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .card-info { padding: 8px 6px; text-align: center; }
+        .ch-title { font-size: 11px; font-weight: 500; color: var(--tg-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* Overlay & Load More */
         .loading-overlay, .error-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); z-index: 20; display: none; }
         .load-more-container { display: flex; justify-content: center; padding: 20px 0 40px; }
         .load-more-btn { background: var(--tg-secondary-bg); color: var(--tg-blue); border: 1px solid var(--tg-blue); padding: 8px 30px; border-radius: 20px; cursor: pointer; font-size: 13px; }
         .hidden { display: none; }
         .skeleton { background: #242f3d; width: 100%; height: 100%; }
 
-        footer { padding: 20px; text-align: center; color: var(--tg-text-secondary); font-size: 11px; border-top: 1px solid #242f3d; }
+        footer { padding: 20px; text-align: center; color: var(--tg-text-secondary); font-size: 11px; border-top: 1px solid #242f3d; margin-top: auto; }
     </style>
 </head>
 <body>
@@ -174,13 +186,7 @@
                         <video data-shaka-player id="video" autoplay style="width:100%;height:100%"></video>
                     </div>
                     <div id="connect-spinner" class="loading-overlay">
-                        <i class="fas fa-spinner fa-spin text-3xl text-gray-400"></i>
-                    </div>
-                    <div id="status-overlay" class="error-overlay">
-                        <div style="text-align: center;">
-                            <p style="color: #ff3b30; font-weight: bold; margin-bottom: 10px;" id="error-msg">Stream Error</p>
-                            <button onclick="location.reload()" style="padding: 5px 15px; border-radius: 4px; border: none; background: white; cursor: pointer;">RETRY</button>
-                        </div>
+                        <i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i>
                     </div>
                 </div>
             </div>
@@ -213,14 +219,11 @@
     </div>
 
     <footer>
-        <p>© 2024 Live Sports Streaming - Telegram Style</p>
+        <p>© 2024 Live Sports Streaming</p>
     </footer>
 
     <script>
-        // Technology logic remains identical as per instructions
-        const AD_URL = "https://intermediategillsevent.com/1b/0f/68/1b0f68c09c17308c6b0d92ee85311590.js";
         const WORKER_BASE_URL = "https://proxy.cricketfanclub.online"; 
-        
         let allChannels = [];
         let displayedCount = 0;
         const CHANNELS_PER_PAGE = 24;
@@ -270,11 +273,11 @@
             const nextBatch = allChannels.slice(displayedCount, displayedCount + CHANNELS_PER_PAGE);
             if (nextBatch.length > 0) {
                 const batchHTML = nextBatch.map(c => {
-                    const imgUrl = c.logo ? c.logo : 'https://via.placeholder.com/200?text=NO+LOGO';
+                    const imgUrl = c.logo ? c.logo : 'https://via.placeholder.com/200x112?text=NO+LOGO';
                     return `
                     <a href="?id=${c.id}" class="channel-card">
                         <div class="card-img-box">
-                            <img src="${imgUrl}" loading="lazy" onerror="this.src='https://via.placeholder.com/200?text=ERROR'">
+                            <img src="${imgUrl}" loading="lazy" onerror="this.src='https://via.placeholder.com/200x112?text=ERROR'">
                         </div>
                         <div class="card-info">
                             <div class="ch-title">${c.name}</div>
@@ -298,7 +301,6 @@
             const params = new URLSearchParams(window.location.search);
             const channelId = params.get('id'); 
 
-            // LIVE Badge Logic
             video.addEventListener('playing', () => { 
                 liveBadge.style.display = 'flex'; 
                 connectSpinner.style.display = "none"; 
