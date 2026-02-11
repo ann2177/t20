@@ -86,7 +86,7 @@
 
         .card-img-box {
             width: 100%;
-            aspect-ratio: 1/1; /* Changed to 1:1 Square Ratio */
+            aspect-ratio: 1/1; /* Changed to 1:1 Ratio */
             background: #000;
             display: flex;
             align-items: center;
@@ -269,7 +269,6 @@
             
             if (nextBatch.length > 0) {
                 const batchHTML = nextBatch.map(c => {
-                    // Placeholder sizes updated to 200x200 for 1:1 ratio
                     const imgUrl = c.logo ? c.logo : 'https://via.placeholder.com/200x200?text=NO+LOGO';
                     return `
                     <a href="?id=${c.id}" class="channel-card custom-card-width group">
@@ -331,7 +330,6 @@
                 
                 let combinedChannels = [...manualChannels, ...m3uChannels];
 
-                // Prioritize images.json logos
                 combinedChannels = combinedChannels.map(ch => {
                     if (customLogos && customLogos[ch.name]) {
                         ch.logo = customLogos[ch.name];
