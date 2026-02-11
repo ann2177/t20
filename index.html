@@ -20,7 +20,7 @@
 
     <script>
         const getCacheBuster = () => Math.floor(Date.now() / (10 * 60 * 1000));
-        window.dataFetchPromise = fetch('list.json?v=' + getCacheBuster())
+        window.dataFetchPromise = fetch('allinone.json?v=' + getCacheBuster())
             .then(response => response.json())
             .catch(err => { console.error("Fetch failed", err); return null; });
         setTimeout(() => { location.reload(); }, 120 * 60 * 1000);
@@ -316,7 +316,7 @@
                 let data = null;
                 const cacheBuster = Math.floor(Date.now() / (10 * 60 * 1000));
                 if(window.dataFetchPromise) data = await window.dataFetchPromise;
-                else { const response = await fetch('links.json?v=' + cacheBuster); data = await response.json(); }
+                else { const response = await fetch('allinone.json?v=' + cacheBuster); data = await response.json(); }
 
                 let manualChannels = (data && data.manual_channels) ? data.manual_channels.map(c => ({
                     id: c.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase(), name: c.name, logo: c.logo, streamUrl: c.url, headers: {}, drm: c.drm 
