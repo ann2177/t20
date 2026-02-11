@@ -2,8 +2,7 @@
   "playlists": [
     
    
-    "https://raw.githubusercontent.com/abusaeeidx/IPTV-Scraper-Zilla/main/CricHD.m3u",
-    "https://raw.githubusercontent.com/abusaeeidx/T-Sports-Playlist-Auto-Update/refs/heads/main/combine_playlist.m3u"
+    "extension://opmeopcambhfimffbomjgemehjkbbmji/iptv/player.html#https://raw.githubusercontent.com/abusaeeidx/CricHd-playlists-Auto-Update-permanent/refs/heads/main/ALL.m3u"
   ],
  "allowed_channels": [
    
@@ -31,24 +30,5 @@
     "Astro Cricket",
    "TNT 1",
    "TNT 2"
-  ],
-  "manual_channels": [
-    {
-      "name": "Prime Sports",
-      "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXCB-kbNwSejb2x5SglFeaJ4mDDopnhmaa-Q&s",
-      "group": "Sports",
-      "url": "",
-      "drm": {
-        "clearKeys": {
-          "9c8743426487c9074b60b456dda93e4d": "643e4f68ec9e3309b7e1e61b95bec85d"
-        }
-      }
-    },
-    {
-      "name": "Star Sports 2HD",
-      "logo": "https://is2-ssl.mzstatic.com/image/thumb/Purple116/v4/9d/94/5b/9d945be1-8c09-8ca5-575a-e28e7ae8355e/AppIcon-0-0-1x_U007emarketing-0-0-0-10-0-0-sRGB-0-0-0-GLES2_U002c0-512MB-85-220-0-0.png/512x512bb.jpg",
-      "group": "Sports",
-      "url": ""
-    }
   ]
 }
