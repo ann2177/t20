@@ -85,13 +85,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         
-        .live-dot { 
-            width: 4px; 
-            height: 4px; 
-            background: white; 
-            border-radius: 50%; 
-            flex-shrink: 0;
-        }
+        .live-dot { width: 4px; height: 4px; background: white; border-radius: 50%; flex-shrink: 0; }
         
         @media (min-width: 768px) {
             .live-indicator { top: 15px; right: 15px; padding: 3px 8px; font-size: 11px; }
@@ -108,32 +102,34 @@
         #ch-name { font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .ch-meta { font-size: 12px; color: var(--tg-text-secondary); }
 
-        /* New Promo Text Styling */
+        /* Updated Small Promo Text */
         .promo-text {
             text-align: center;
-            margin-top: 20px;
-            font-size: 13px;
+            margin-top: 15px;
+            font-size: 10.5px; /* Extra Small Size */
             color: var(--tg-text-secondary);
             padding: 0 15px;
+            letter-spacing: 0.2px;
+            opacity: 0.9;
         }
         .promo-text b { color: var(--tg-blue); font-weight: 600; }
 
         .tg-join-box {
             display: flex;
             justify-content: center;
-            margin: 12px 0 25px 0; /* Adjusted margin */
+            margin: 10px 0 25px 0;
         }
         .btn-telegram {
             background-color: var(--tg-blue);
             color: white;
             text-decoration: none;
-            padding: 10px 24px;
-            border-radius: 25px;
+            padding: 8px 20px;
+            border-radius: 20px;
             font-weight: 500;
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .section-title {
@@ -219,7 +215,7 @@
 
         <div class="tg-join-box">
             <a href="https://t.me/Hitwicket_updates" target="_blank" class="btn-telegram">
-                <i class="fab fa-telegram-plane"></i>Telegram Channel
+                <i class="fab fa-telegram-plane"></i> Join Telegram Channel
             </a>
         </div>
 
@@ -236,7 +232,7 @@
     </div>
 
     <footer>
-        <p>© 2025 Live Sports Streaming</p>
+        <p>© 2024 Live Sports Streaming</p>
     </footer>
 
     <script>
