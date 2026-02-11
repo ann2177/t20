@@ -86,7 +86,8 @@
 
         .card-img-box {
             width: 100%;
-            aspect-ratio: 16/9;
+            /* Changed to 1:1 ratio as requested */
+            aspect-ratio: 1 / 1; 
             background: #000;
             display: flex;
             align-items: center;
@@ -269,12 +270,11 @@
             
             if (nextBatch.length > 0) {
                 const batchHTML = nextBatch.map(c => {
-                    // Direct image loading without Weserv proxy
-                    const imgUrl = c.logo ? c.logo : 'https://via.placeholder.com/200x112?text=NO+LOGO';
+                    const imgUrl = c.logo ? c.logo : 'https://via.placeholder.com/200x200?text=NO+LOGO';
                     return `
                     <a href="?id=${c.id}" class="channel-card custom-card-width group">
                         <div class="card-img-box">
-                            <img src="${imgUrl}" loading="lazy" class="opacity-80 group-hover:opacity-100 transition-opacity" onerror="this.src='https://via.placeholder.com/200x112?text=ERROR'">
+                            <img src="${imgUrl}" loading="lazy" class="opacity-80 group-hover:opacity-100 transition-opacity" onerror="this.src='https://via.placeholder.com/200x200?text=ERROR'">
                         </div>
                         <div class="card-info">
                             <div class="ch-title">${c.name}</div>
@@ -331,7 +331,6 @@
                 
                 let combinedChannels = [...manualChannels, ...m3uChannels];
 
-                // Prioritize images.json logos
                 combinedChannels = combinedChannels.map(ch => {
                     if (customLogos && customLogos[ch.name]) {
                         ch.logo = customLogos[ch.name];
