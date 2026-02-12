@@ -306,77 +306,84 @@
 
         async function initPlayer() {
             const video = document.getElementById('video');
-            const liveBadge = document.getElementById('live-badge');
+            // UI එක load වෙනකම් පොඩ්ඩක් ඉන්න
             if (!video['ui']) { const checkUI = setInterval(() => { if (video['ui']) { clearInterval(checkUI); initPlayer(); } }, 100); return; }
 
-            const player = video['ui'].getControls().getPlayer();
+            const ui = video['ui'];
+            const player = ui.getControls().getPlayer();
+            const overlay = document.getElementById('status-overlay');
             const connectSpinner = document.getElementById('connect-spinner');
+            const videoWrapper = document.getElementById('video-wrapper');
             const params = new URLSearchParams(window.location.search);
             const channelId = params.get('id'); 
 
-            video.addEventListener('playing', () => { 
-                liveBadge.style.display = 'flex'; 
-                connectSpinner.style.display = "none"; 
-                document.getElementById('ch-status').innerText = "Streaming";
+            // --- 1. Event Listeners (Superb Logic) ---
+
+            // මොකක් හරි error එකක් ආවොත් (ලින්ක් එක dead නම්) spinner එක නවත්තලා error එක පෙන්වන්න
+            player.addEventListener('error', (e) => { 
+                if(e.detail.code != 7000) { // 7000 කියන්නේ සාමාන්‍යයෙන් load interrupt එකක්, ඒක skip කරන්න
+                    connectSpinner.style.display = "none";
+                    videoWrapper.classList.remove("loading-state");
+                    showError("Stream Error: " + e.detail.code); 
+                }
             });
-            video.addEventListener('waiting', () => { liveBadge.style.display = 'none'; });
-            video.addEventListener('pause', () => { liveBadge.style.display = 'none'; });
-            video.addEventListener('ended', () => { liveBadge.style.display = 'none'; });
+
+            // Buffering වෙන වෙලාවට විතරක් spinner එක පෙන්වන සුපිරිම ක්‍රමය
+            player.addEventListener('buffering', (event) => {
+                if (event.buffering) { 
+                    connectSpinner.style.display = "flex"; 
+                    videoWrapper.classList.add("loading-state"); 
+                } else if (!video.paused) { 
+                    connectSpinner.style.display = "none"; 
+                    videoWrapper.classList.remove("loading-state"); 
+                    document.getElementById('ch-quality').innerText = "Live HD";
+                }
+            });
 
             try {
+                // Data fetch 
+                let data = null;
                 const cacheBuster = Math.floor(Date.now() / (10 * 60 * 1000));
-                const [data, customLogos, customNames] = await Promise.all([
-                    window.dataFetchPromise || fetch('allinone.json?v=' + cacheBuster).then(r => r.json()),
-                    fetch('images.json?v=' + cacheBuster).then(r => r.json()).catch(() => ({})),
-                    fetch('names.json?v=' + cacheBuster).then(r => r.json()).catch(() => ({}))
-                ]);
+                if(window.dataFetchPromise) data = await window.dataFetchPromise;
+                else { const response = await fetch('links.json?v=' + cacheBuster); data = await response.json(); }
 
-                let rawChannels = [];
-                if (data && data.manual_channels) {
-                    rawChannels.push(...data.manual_channels.map(c => ({
-                        name: c.name, logo: c.logo, streamUrl: c.url, headers: {}, drm: c.drm 
-                    })));
-                }
+                // ... 
+                let manualChannels = (data && data.manual_channels) ? data.manual_channels.map(c => ({
+                    id: c.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase(), name: c.name, logo: c.logo, quality: "HD", streamUrl: c.url, headers: {}, drm: c.drm 
+                })) : [];
+                let m3uChannels = [];
                 if (data && data.playlists) {
-                    const m3uResults = await Promise.all(data.playlists.map(async (url) => {
-                        try { return await parseM3U(await (await fetch(url + (url.includes('?') ? '&' : '?') + 'v=' + cacheBuster)).text()); } 
+                    const promises = data.playlists.map(async (url) => {
+                        try { return await parseM3U(await (await fetch(url + (url.includes('?') ? '&' : '?') + 'update=' + cacheBuster)).text()); } 
                         catch (e) { return []; }
-                    }));
-                    rawChannels.push(...m3uResults.flat());
-                }
-
-                let filteredList = [];
-                if (data && data.allowed_channels && Array.isArray(data.allowed_channels)) {
-                    data.allowed_channels.forEach(allowed => {
-                        const match = rawChannels.find(ch => ch.name.toLowerCase().trim() === allowed.toLowerCase().trim());
-                        if (match) filteredList.push(match);
                     });
-                } else {
-                    filteredList = rawChannels;
+                    m3uChannels = (await Promise.all(promises)).flat();
                 }
+                let combinedChannels = [...manualChannels, ...m3uChannels];
+                if (data && data.allowed_channels && Array.isArray(data.allowed_channels)) {
+                    allChannels = [];
+                    data.allowed_channels.forEach(allowedName => {
+                        const match = combinedChannels.find(ch => ch.name.toLowerCase().trim() === allowedName.toLowerCase().trim());
+                        if (match) allChannels.push(match);
+                    });
+                } else { allChannels = combinedChannels; }
+                allChannels = allChannels.filter(c => c.streamUrl && c.streamUrl.trim() !== "");
 
-                allChannels = filteredList.map(ch => {
-                    const originalName = ch.name;
-                    if (customNames && customNames[originalName]) ch.name = customNames[originalName];
-                    ch.id = ch.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-                    if (customLogos && customLogos[originalName]) ch.logo = customLogos[originalName];
-                    return ch;
-                });
-
-                allChannels = allChannels.filter(c => c.streamUrl);
-
-                if (allChannels.length > 0) {
-                    renderChannelBatch();
-                    document.getElementById('loadMoreBtn').addEventListener('click', renderChannelBatch);
+                if (allChannels.length > 0) { 
+                    renderChannelBatch(); 
+                    document.getElementById('loadMoreBtn').addEventListener('click', renderChannelBatch); 
                 }
 
                 const ch = allChannels.find(c => c.id === channelId);
                 if (ch) {
-                    document.getElementById('page-title').innerText = ch.name;
+                    document.getElementById('page-title').innerText = ch.name + " | HIT Wicket";
                     document.getElementById('ch-name').innerText = ch.name;
-                    connectSpinner.style.display = "flex";
+                    document.getElementById('ch-quality').innerText = "Connecting...";
+                    connectSpinner.style.display = "flex"; 
+                    videoWrapper.classList.add("loading-state");
 
-                    player.getNetworkingEngine().registerRequestFilter((type, request) => {
+                    // Request Filter (Proxy settings)
+                    player.getNetworkingEngine().registerRequestFilter(function(type, request) {
                         if (request.uris[0].includes(WORKER_BASE_URL)) return;
                         let proxyUrl = `${WORKER_BASE_URL}?url=${encodeURIComponent(request.uris[0])}`;
                         if (ch.headers.Referer) proxyUrl += `&referer=${encodeURIComponent(ch.headers.Referer)}`;
@@ -385,10 +392,48 @@
                         request.uris[0] = proxyUrl;
                     });
                     
-                    player.configure({ drm: ch.drm || { clearKeys: {} }, streaming: { bufferingGoal: 3, lowLatencyMode: true } });
+                    // --- 2. Player Configurations (Superb Settings) ---
+                    player.configure({ 
+                        drm: ch.drm || { clearKeys: {} }, 
+                        streaming: { 
+                            bufferingGoal: 3, 
+                            rebufferingGoal: 1, 
+                            retryParameters: { 
+                                maxAttempts: 3, // 3
+                                baseDelay: 1000,
+                                timeout: 10000 // 
+                            }, 
+                            lowLatencyMode: true 
+                        } 
+                    });
+                    
+                    // Video load 
+                    const hideSpinner = () => { 
+                        connectSpinner.style.display = "none"; 
+                        videoWrapper.classList.remove("loading-state"); 
+                    };
+                    video.addEventListener('playing', hideSpinner, { once: true });
+                    
                     await player.load(ch.streamUrl);
+                    
+                } else {
+                    if(!channelId) { 
+                        document.getElementById('ch-name').innerText = "Select a Channel"; 
+                        connectSpinner.style.display = "none"; 
+                    } else { 
+                        showError("Channel Not Found"); 
+                        connectSpinner.style.display = "none"; 
+                    }
                 }
-            } catch (err) { console.error(err); }
+            } catch (err) { 
+                connectSpinner.style.display = "none"; 
+                if(channelId) showError("Failed to Load Stream"); 
+            }
+
+            function showError(msg) { 
+                overlay.classList.add('show'); 
+                document.getElementById('error-msg').innerText = msg; 
+            }
         }
 
         if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initApp); } else { initApp(); }
