@@ -100,6 +100,33 @@
         #ch-name { font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .ch-meta { font-size: 12px; color: var(--tg-text-secondary); }
 
+        /* Overlay Styles */
+        .loading-overlay, .error-overlay { 
+            position: absolute; 
+            inset: 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            background: rgba(0,0,0,0.9); 
+            z-index: 40; 
+            display: none; 
+            text-align: center;
+            padding: 20px;
+        }
+        .error-overlay { z-index: 50; }
+        .error-overlay i { color: #ff3b30; font-size: 2rem; margin-bottom: 10px; }
+        .retry-btn { 
+            margin-top: 15px; 
+            background: var(--tg-blue); 
+            color: white; 
+            border: none; 
+            padding: 8px 20px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-weight: 600;
+        }
+
         .promo-text {
             text-align: center;
             margin-top: 15px;
@@ -172,7 +199,6 @@
         .card-info { padding: 8px 6px; text-align: center; }
         .ch-title { font-size: 11px; font-weight: 500; color: var(--tg-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .loading-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); z-index: 20; display: none; }
         .load-more-container { display: flex; justify-content: center; padding: 20px 0 40px; }
         .load-more-btn { background: var(--tg-secondary-bg); color: var(--tg-blue); border: 1px solid var(--tg-blue); padding: 8px 30px; border-radius: 20px; cursor: pointer; font-size: 13px; }
         .hidden { display: none; }
@@ -193,8 +219,16 @@
                         </div>
                         <video data-shaka-player id="video" autoplay style="width:100%;height:100%"></video>
                     </div>
+                    
                     <div id="connect-spinner" class="loading-overlay">
                         <i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i>
+                        <p style="margin-top:10px; font-size:12px; color:#708499;">Loading Stream...</p>
+                    </div>
+
+                    <div id="status-overlay" class="error-overlay">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p id="error-msg" style="font-weight:bold;">Failed to Load Stream</p>
+                        <button onclick="location.reload()" class="retry-btn">Retry</button>
                     </div>
                 </div>
             </div>
@@ -307,23 +341,26 @@
             const video = document.getElementById('video');
             const liveBadge = document.getElementById('live-badge');
             const connectSpinner = document.getElementById('connect-spinner');
+            const statusOverlay = document.getElementById('status-overlay');
+            const errorMsg = document.getElementById('error-msg');
             
             if (!video['ui']) { 
                 const checkUI = setInterval(() => { if (video['ui']) { clearInterval(checkUI); initPlayer(); } }, 100); 
                 return; 
             }
 
-            const ui = video['ui'];
-            const player = ui.getControls().getPlayer();
+            const player = video['ui'].getControls().getPlayer();
             const params = new URLSearchParams(window.location.search);
             const channelId = params.get('id'); 
 
-            // Logic to handle Spinner & Badge
+            // --- Error Handler ---
             player.addEventListener('error', (e) => { 
                 if(e.detail.code != 7000) {
                     console.error("Shaka Error:", e.detail.code);
-                    document.getElementById('ch-status').innerText = "Error: " + e.detail.code;
                     connectSpinner.style.display = "none";
+                    statusOverlay.style.display = "flex";
+                    errorMsg.innerText = "Stream Error: " + e.detail.code;
+                    document.getElementById('ch-status').innerText = "Failed";
                 }
             });
 
@@ -340,6 +377,7 @@
             video.addEventListener('playing', () => { 
                 liveBadge.style.display = 'flex'; 
                 connectSpinner.style.display = "none"; 
+                statusOverlay.style.display = "none";
                 document.getElementById('ch-status').innerText = "Streaming";
             });
 
@@ -371,9 +409,7 @@
                         const match = rawChannels.find(ch => ch.name.toLowerCase().trim() === allowed.toLowerCase().trim());
                         if (match) filteredList.push(match);
                     });
-                } else {
-                    filteredList = rawChannels;
-                }
+                } else { filteredList = rawChannels; }
 
                 allChannels = filteredList.map(ch => {
                     const originalName = ch.name;
@@ -384,7 +420,6 @@
                 });
 
                 allChannels = allChannels.filter(c => c.streamUrl);
-
                 if (allChannels.length > 0) {
                     renderChannelBatch();
                     document.getElementById('loadMoreBtn').addEventListener('click', renderChannelBatch);
@@ -406,7 +441,6 @@
                         request.uris[0] = proxyUrl;
                     });
                     
-                    // High-performance configuration
                     player.configure({ 
                         drm: ch.drm || { clearKeys: {} }, 
                         streaming: { 
@@ -418,8 +452,16 @@
                     });
 
                     await player.load(ch.streamUrl);
+                } else if (channelId) {
+                    statusOverlay.style.display = "flex";
+                    errorMsg.innerText = "Channel Not Found";
+                    connectSpinner.style.display = "none";
                 }
-            } catch (err) { console.error(err); }
+            } catch (err) { 
+                console.error(err); 
+                statusOverlay.style.display = "flex";
+                connectSpinner.style.display = "none";
+            }
         }
 
         if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initApp); } else { initApp(); }
