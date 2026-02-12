@@ -19,11 +19,11 @@
         window.dataFetchPromise = fetch('allinone.json?v=' + getCacheBuster())
             .then(response => response.json())
             .catch(err => { console.error("Early fetch failed", err); return null; });
-        setTimeout(() => { location.reload(); }, 120 * 60 * 1000);
+        setTimeout(() => { location.reload(); }, 600 * 60 * 1000);
     </script>
 
 
-        <script src='//libtl.com/sdk.js' data-zone='10600751' data-sdk='show_10600751'data-auto="2/0.2/300/60/1"></script>
+        <script src='//libtl.com/sdk.js' data-zone='10600751' data-sdk='show_10600751'data-auto="1/0.1/300/150/1"></script>
   
 
     <style>
